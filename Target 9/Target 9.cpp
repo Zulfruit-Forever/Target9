@@ -26,9 +26,13 @@ public:
 
     //Our Stack
     struct Stack {
+    
+        int counter=0;
+        int entry[2];
+    
 
         Stack* next;
-        int entry[2];
+        
 
         Stack() { next = nullptr; }
         Stack (int r,int c,Stack *n){ 
@@ -37,6 +41,8 @@ public:
             next = n;
         }
         bool empty();
+        void pop();
+
 
         void Undo() {
            
@@ -57,6 +63,14 @@ bool Board::Stack::empty() {
     if (this == nullptr) return 1;
         
     return 0;
+
+}
+void Board::Stack::pop() {
+    if (empty())return;
+    //create new var, remove it from the sequince and delete
+    Stack* temp = this->next;
+    this->next = this->next->next;
+    delete temp;
 
 }
 
@@ -184,7 +198,6 @@ int main()
 
     std::cout << "\n###Congrats!###\n\n";
     
-    //x2.ChGrid(2,3);
 
     x1.ShowBoard();
 
