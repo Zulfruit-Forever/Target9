@@ -153,7 +153,7 @@ struct Stack {
 
     void Undo(Board& board) {
 
-        if (this->empty()) {
+        if (this->empty() ) {
             std::cout << "No moves to undo!\n";
             return;
         }
@@ -171,9 +171,13 @@ struct Stack {
         counter--;
 
     }
-    void Redo() {
+    void Redo(Board& board) {
         std::cout << "Redo\n";
 
+        if (next==nullptr) {
+            std::cout << "No moves to redo!\n";
+            return;
+        }
     }
 
 
@@ -192,7 +196,7 @@ struct Stack {
 //Check for Stack is empty
 bool Stack::empty() {
 
-    if (this == nullptr) return 1;
+    if (this->next == nullptr) return 1;
 
     return 0;
 
@@ -219,14 +223,15 @@ void Stack::push(int row, int col) {
 
 /// Main Function
 
-int main()
-{    // Obj to main
+int main() {
+    // Obj to main
     Board x1;
 
     // Obj to the Stack
     Stack* x2 = new Stack;
 
     char ans = 'y';
+    int choice;
 
     std::cout << "#Select the Difficulty \\1-9\\\n";
     std::cin >> x1.difficultyVar;
@@ -250,30 +255,48 @@ int main()
     */
 
     do {
-        std::cout << std::endl;
+        std::cout << "\nMenu:\n";
+        std::cout << "1. Undo Last Move\n";
+        std::cout << "2. Redo Last Move\n";
+        std::cout << "3. Exit Game\n";
+        std::cout << "4. Make a Move\n";
+        std::cout << "Select an option: ";
+        std::cin >> choice;
 
-        // x1.ShowBoard();
-
-        do {
-            std::cout << "\n#Select the row and cow \n#In the range of 1-3 # That Does not affect 9-s in the Grid#\n";
-            std::cin >> x1.row >> x1.col;
-        } while ((x1.row < 1 || x1.row > 3 || x1.col < 1 || x1.col > 3) || (x1.ValidationCheck(x1.row, x1.col) == 0));
-
-        x1.changeGrid(x1.row - 1, x1.col - 1, 0);
-
-        x1.ShowBoard();
-
-        std::cout << std::endl;
-        // Manual push 
-
-        x2->next = new Stack(x1.row, x1.col, x2->next);
-
-        std::cout << "Undo?\n#";
-        std::cin >> ans;
-        if (ans == 'y')
+        switch (choice) {
+        case 1: // Undo last move
             x2->Undo(x1);
-        else
-            std::cout << "Oh\n";
+            break;
+
+        case 2: // Redo last move
+            x2->Redo(x1);
+            break;
+
+        case 3: // Exit game
+            std::cout << "Exiting game. Goodbye!\n";
+            delete x2;
+            return 0;
+
+        case 4: // Make a move
+            do {
+                std::cout << "\n#Select the row and cow \n#In the range of 1-3 # That Does not affect 9-s in the Grid#\n";
+                std::cin >> x1.row >> x1.col;
+            } while ((x1.row < 1 || x1.row > 3 || x1.col < 1 || x1.col > 3) || (x1.ValidationCheck(x1.row, x1.col) == 0));
+
+            x1.changeGrid(x1.row - 1, x1.col - 1, 0);
+
+            x1.ShowBoard();
+
+            std::cout << std::endl;
+            // Manual push 
+
+            x2->next = new Stack(x1.row, x1.col, x2->next);
+
+            break;
+
+        default:
+            std::cout << "Invalid choice! Try again.\n";
+        }
 
     } while (x1.Finish() != 1);
 
@@ -287,4 +310,3 @@ int main()
 
     return 0;
 }
-
