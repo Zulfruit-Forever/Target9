@@ -104,7 +104,9 @@ void Board::changeGrid(int row, int col, bool seq) {
     }
 }
 
-
+//
+//Shows The Board
+//
 void Board::ShowBoard() const {
     std::cout << "* # " <<  "# " << "#\n";
 
@@ -117,8 +119,6 @@ void Board::ShowBoard() const {
     }
         
 }
-
-
 
 struct Entry {
     int row;
@@ -207,7 +207,7 @@ void Stack::pop() {
     delete temp;
 
 }
-
+//Useless
 void Stack::push(int row, int col) {
 
     this->next = new Stack(row, col, this->next); // Create a new node and link it to the previous
@@ -217,77 +217,68 @@ void Stack::push(int row, int col) {
 }
 
 
+/// Main Function
 
 int main()
-{   //Obj to main
+{    // Obj to main
     Board x1;
 
-    //Obj to the Stack
-    Stack *x2 = new Stack;
+    // Obj to the Stack
+    Stack* x2 = new Stack;
 
-   // int row, cow;
     char ans = 'y';
 
     std::cout << "#Select the Difficulty \\1-9\\\n";
     std::cin >> x1.difficultyVar;
 
     std::cout << "This is that You Must Get\n";
-   
     x1.ShowBoard();
     std::cout << "\n";
 
-
+    // Change the Grid by Difficulty
     x1.Difficulty();
 
     std::cout << "From this...Ehh...Good Luck Then!\n";
-
     x1.ShowBoard();
 
     /*
     do {
-
-
         if (ans == 'n') break;
         else if (ans == 'y') continue;
         else std::cout << "Undifined command";
     } while ((std::cin>>ans));
     */
+
     do {
-       
         std::cout << std::endl;
 
-       // x1.ShowBoard();
-        
+        // x1.ShowBoard();
+
         do {
             std::cout << "\n#Select the row and cow \n#In the range of 1-3 # That Does not affect 9-s in the Grid#\n";
             std::cin >> x1.row >> x1.col;
+        } while ((x1.row < 1 || x1.row > 3 || x1.col < 1 || x1.col > 3) || (x1.ValidationCheck(x1.row, x1.col) == 0));
 
-
-        }while ((x1.row < 1 || x1.row>3 || x1.col < 1 || x1.col>3) || (x1.ValidationCheck(x1.row,x1.col) == 0));
-        
-
-        x1.changeGrid(x1.row -1, x1.col -1,0);
+        x1.changeGrid(x1.row - 1, x1.col - 1, 0);
 
         x1.ShowBoard();
 
-
         std::cout << std::endl;
         // Manual push 
-        
+
         x2->next = new Stack(x1.row, x1.col, x2->next);
-     
-        
-        std::cout << "Undo?\n#"; 
+
+        std::cout << "Undo?\n#";
         std::cin >> ans;
         if (ans == 'y')
             x2->Undo(x1);
         else
             std::cout << "Oh\n";
 
-    } while (x1.Finish()!=1);
+    } while (x1.Finish() != 1);
 
     std::cout << "\n###Congrats!###\n\n";
-    
+
     std::cout << "print\n";
     x2->printStack();
 
