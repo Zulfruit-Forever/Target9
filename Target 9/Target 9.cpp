@@ -7,7 +7,6 @@
 
 class Board {
 private:
-    int counter = 0;
     int Grid[3][3] = { {9,9,9},{9,9,9},{9,9,9} };
     
 public:
@@ -28,23 +27,15 @@ public:
 
 };
 
-
-    bool Board::ValidationCheck(int row, int col) const  {
-        //bool check=0;
-
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (i == row || j == col) {
-               
-                    if (Grid[i][j] == 9)
-                         return 1;
-                }
-            }
+// Check the specified row or column to not be = 9;
+bool Board::ValidationCheck(int row, int col) const {
+    for (int i = 0; i < 3; i++) {
+        if (Grid[row][i] == 9 || Grid[i][col] == 9) {
+            return true; 
         }
-
-
-        return 0;
     }
+    return false;
+}
 
 bool Board::Finish() const {
     int reference[3][3] = { {9,9,9},{9,9,9},{9,9,9} };
@@ -64,7 +55,7 @@ void Board::Difficulty() {
     srand(time(0));
 
     for (int k = 0; k < difficultyVar; k++) {
-        int row = rand() % 3 + 1, col = rand() % 3 + 1;
+        int row = rand() % 3 , col = rand() % 3 ;
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -89,17 +80,16 @@ void Board::changeGrid(int row, int col, bool seq) {
     
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            if (i == row || j == col) {
-                if (seq == false) {
-                    if (Grid[i][j] != 9)
-                        Grid[i][j] += 1;
-                }
-                else
-                    if (Grid[i][j] != 0)
-                        Grid[i][j] -= 1;
+            if (seq == false) {
+                if (i == row || j == col)
+                    Grid[i][j] += 1;
+            }
+            else
+                if (i == row || j == col)
+                    Grid[i][j] -= 1;
+          
 
-
-            }  
+             
         }
     }
 }
@@ -163,11 +153,13 @@ struct Stack {
         printf("\nMethod Undo\n");
 
 
-        board.changeGrid(this->next->entry.row-1, this->next->entry.col-1, 1);
+        board.changeGrid(this->next->entry.row, this->next->entry.col, 1);
 
         std::cout << "\n";
 
         board.ShowBoard();
+
+        this->next = this->next->next;
         counter--;
 
     }
@@ -230,7 +222,7 @@ int main() {
     // Obj to the Stack
     Stack* x2 = new Stack;
 
-    char ans = 'y';
+    char ans ;
     int choice;
 
     std::cout << "#Select the Difficulty \\1-9\\\n";
@@ -281,15 +273,16 @@ int main() {
             do {
                 std::cout << "\n#Select the row and cow \n#In the range of 1-3 # That Does not affect 9-s in the Grid#\n";
                 std::cin >> x1.row >> x1.col;
-            } while ((x1.row < 1 || x1.row > 3 || x1.col < 1 || x1.col > 3) || (x1.ValidationCheck(x1.row, x1.col) == 0));
+                x1.row--; x1.col--;
+            } while ((x1.row < 0 || x1.row > 2 || x1.col < 0 || x1.col > 2) || (x1.ValidationCheck(x1.row, x1.col) ));
 
-            x1.changeGrid(x1.row - 1, x1.col - 1, 0);
+            x1.changeGrid(x1.row , x1.col , 0);
 
             x1.ShowBoard();
 
             std::cout << std::endl;
-            // Manual push 
 
+            // Manual push 
             x2->next = new Stack(x1.row, x1.col, x2->next);
 
             break;
@@ -306,7 +299,12 @@ int main() {
     x2->printStack();
 
     x1.ShowBoard();
+
+    //Clean memory
+
     delete x2;
+
+        
 
     return 0;
 }
