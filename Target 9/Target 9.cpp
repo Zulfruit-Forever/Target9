@@ -31,7 +31,7 @@ public:
 bool Board::ValidationCheck(int row, int col) const {
     for (int i = 0; i < 3; i++) {
         if (Grid[row][i] == 9 || Grid[i][col] == 9) {
-            return true; 
+            return true; //One of them is a 9
         }
     }
     return false;
@@ -86,10 +86,7 @@ void Board::changeGrid(int row, int col, bool seq) {
             }
             else
                 if (i == row || j == col)
-                    Grid[i][j] -= 1;
-          
-
-             
+                    Grid[i][j] -= 1; 
         }
     }
 }
@@ -118,32 +115,34 @@ struct Entry {
 
 //Our Stack
 struct Stack {
-
-    int counter = 0;
+private:
+    Stack* topnode;
+    Stack* currentNode;
+    Stack* next = nullptr;
+public:
     Entry entry;
 
-    Stack* next;
-
-    Stack() { next = nullptr; }
+    Stack() { topnode = nullptr; currentNode = nullptr;}
+    
     Stack(int r, int c, Stack* n) {
         entry.row = r;
         entry.col = c;
         next = n;
-        counter++;
     }
     //is it empty?
     bool empty();
     //delete
     void pop();
-
+    //Do you really need comments for that?
     void push(int, int);
-    //find size
-    int size() const { return counter; }
+
+    //
+    //void clearAfterUndo();
 
 
     void Undo(Board& board) {
 
-        if (this->empty() ) {
+        if (currentNode==nullptr ){
             std::cout << "No moves to undo!\n";
             return;
         }
@@ -153,29 +152,49 @@ struct Stack {
         printf("\nMethod Undo\n");
 
 
-        board.changeGrid(this->next->entry.row, this->next->entry.col, 1);
+        board.changeGrid(currentNode->entry.row, currentNode->entry.col, 1);
 
+        currentNode = currentNode->next;
         std::cout << "\n";
 
         board.ShowBoard();
 
-        this->next = this->next->next;
-        counter--;
 
     }
     void Redo(Board& board) {
-        std::cout << "Redo\n";
 
-        if (next==nullptr) {
+        Stack* temp = topnode;
+
+        if (topnode == nullptr) {
             std::cout << "No moves to redo!\n";
             return;
         }
+
+        //we need to find a node before the current
+        //    ___         ___
+        //      ||   v   ||
+        //      ||  temp ||
+        //      ||   v   ||
+        //      ||current||
+        //      ||   v   ||
+        //      ||  next ||
+        //         
+    
+        while (temp!= currentNode)
+            temp = temp->next;
+
+        std::cout << "Redo\n";
+
+        if((board.ValidationCheck(currentNode->entry.row, currentNode->entry.row)))
+            board.changeGrid(temp->entry.row, temp->entry.col, 0);
+
+         board.ShowBoard();
     }
 
 
     //check
     void printStack() {
-        Stack* current = this->next;
+        Stack* current = topnode;
         while (current != nullptr) {
             std::cout << "Row: " << current->entry.row << ", Col: " << current->entry.col << std::endl;
             current = current->next;
@@ -186,9 +205,10 @@ struct Stack {
 
 
 //Check for Stack is empty
+//Useless
 bool Stack::empty() {
 
-    if (this->next == nullptr) return 1;
+    if (topnode== nullptr) return 1;
 
     return 0;
 
@@ -198,20 +218,53 @@ bool Stack::empty() {
 void Stack::pop() {
     if (empty())return;
     //create new var, remove it from the sequince and delete
-    Stack* temp = this->next;
-    this->next = this->next->next;
+    Stack* temp = topnode;
+    topnode = topnode->next;
     delete temp;
 
 }
-//Useless
+//Pushing the new entitis to the stack;
 void Stack::push(int row, int col) {
 
-    this->next = new Stack(row, col, this->next); // Create a new node and link it to the previous
-    this->counter++; // Increment the counter
+   
 
+    /*This double loop must :
+    * 
+    Check if there is something next from the current node, if yes  :
+        topNode          current    
+           v                v //that next!=nullptr||that next too||that next==nullptr , this is the end 
+           v                v        V               V              V
+       | x   y |   ->   | x   y |   ->   | x  y |   ->   | x  y |  -> nullptr;
+
+       We have to find the last NODE and delete it and every other node untill current node to prevent the memory leak
+    */
+    //Check for currentNode, if this is a first entry then currentnode will always be a nullptr;
+    if (currentNode != nullptr) {
+        Stack* cleaner = currentNode;
+        if (currentNode->next != nullptr) {
+            while (currentNode->next == nullptr) {
+                Stack* cleaner = currentNode;
+                while (cleaner->next != nullptr)
+                    cleaner = cleaner->next;
+                delete cleaner;
+
+            }
+        }
+
+    }
+ 
+
+    Stack* temp = new Stack;
+
+    temp->entry.row = row;
+    temp->entry.col = col;
+
+    topnode = temp; // Update topnode to point to the new node
+ 
+
+    currentNode = topnode;
 
 }
-
 
 /// Main Function
 
@@ -222,7 +275,7 @@ int main() {
     // Obj to the Stack
     Stack* x2 = new Stack;
 
-    char ans ;
+    //char ans ;
     int choice;
 
     std::cout << "#Select the Difficulty \\1-9\\\n";
@@ -238,16 +291,8 @@ int main() {
     std::cout << "From this...Ehh...Good Luck Then!\n";
     x1.ShowBoard();
 
-    /*
     do {
-        if (ans == 'n') break;
-        else if (ans == 'y') continue;
-        else std::cout << "Undifined command";
-    } while ((std::cin>>ans));
-    */
-
-    do {
-        std::cout << "\nMenu:\n";
+        std::cout << "\n#Menu#\n";
         std::cout << "1. Undo Last Move\n";
         std::cout << "2. Redo Last Move\n";
         std::cout << "3. Exit Game\n";
@@ -283,7 +328,9 @@ int main() {
             std::cout << std::endl;
 
             // Manual push 
-            x2->next = new Stack(x1.row, x1.col, x2->next);
+            x2->push(x1.row, x1.col);
+
+            //x2->next = new Stack(x1.row, x1.col, x2->next);
 
             break;
 
@@ -303,8 +350,6 @@ int main() {
     //Clean memory
 
     delete x2;
-
-        
 
     return 0;
 }
