@@ -1,5 +1,5 @@
 //Zulfat Zigangirov U234N1241 07/12/2024
-//Java Course Changed me...
+
 
 #include <iostream>
 #include <iomanip>
@@ -147,7 +147,6 @@ public:
             return;
         }
 
-
         //easter egg with printf
         printf("\nMethod Undo\n");
 
@@ -165,7 +164,7 @@ public:
 
         Stack* temp = topnode;
 
-        if (topnode == nullptr) {
+        if (topnode == currentNode||topnode==nullptr) {
             std::cout << "No moves to redo!\n";
             return;
         }
@@ -180,15 +179,17 @@ public:
         //      ||  next ||
         //         
     
-        while (temp!= currentNode)
+        while (temp->next!= currentNode)
             temp = temp->next;
 
         std::cout << "Redo\n";
 
-        if((board.ValidationCheck(currentNode->entry.row, currentNode->entry.row)))
+        //if ((board.ValidationCheck(currentNode->entry.row, currentNode->entry.row)))
             board.changeGrid(temp->entry.row, temp->entry.col, 0);
-
+        //else
+        //   std::cout << "Cannot procced, 9-s being affected\n";
          board.ShowBoard();
+         currentNode = temp;
     }
 
 
@@ -214,7 +215,7 @@ bool Stack::empty() {
 
 }
 
-
+//didnt implemented that
 void Stack::pop() {
     if (empty())return;
     //create new var, remove it from the sequince and delete
@@ -226,44 +227,32 @@ void Stack::pop() {
 //Pushing the new entitis to the stack;
 void Stack::push(int row, int col) {
 
-   
-
     /*This double loop must :
-    * 
+    *
     Check if there is something next from the current node, if yes  :
-        topNode          current    
-           v                v //that next!=nullptr||that next too||that next==nullptr , this is the end 
+        topNode          current
+           v                v //that next!=nullptr||that next too||that next==nullptr , this is the end
            v                v        V               V              V
        | x   y |   ->   | x   y |   ->   | x  y |   ->   | x  y |  -> nullptr;
 
-       We have to find the last NODE and delete it and every other node untill current node to prevent the memory leak
+       We have to find the last NODE and delete it and every other node until current node to prevent the memory leak
     */
-    //Check for currentNode, if this is a first entry then currentnode will always be a nullptr;
+
+    // If there are nodes after the currentNode, clean them up to avoid memory leaks
     if (currentNode != nullptr) {
-        Stack* cleaner = currentNode;
-        if (currentNode->next != nullptr) {
-            while (currentNode->next == nullptr) {
-                Stack* cleaner = currentNode;
-                while (cleaner->next != nullptr)
-                    cleaner = cleaner->next;
-                delete cleaner;
-
-            }
+        Stack* cleaner = currentNode->next;
+        while (cleaner != nullptr) {
+            Stack* toDelete = cleaner;
+            cleaner = cleaner->next; // Move to the next node.
+            delete toDelete;         // Delete the current node.
         }
-
+        currentNode->next = nullptr; // Ensure no dangling pointers.
     }
- 
 
-    Stack* temp = new Stack;
-
-    temp->entry.row = row;
-    temp->entry.col = col;
-
-    topnode = temp; // Update topnode to point to the new node
- 
-
-    currentNode = topnode;
-
+    // Create a new node for the new move
+    Stack* temp = new Stack(row, col, topnode); // The new node's next is the current top node.
+    topnode = temp; // Update topnode to point to the new node.
+    currentNode = topnode; // Set currentNode to the new topnode.
 }
 
 /// Main Function
@@ -317,6 +306,9 @@ int main() {
         case 4: // Make a move
             do {
                 std::cout << "\n#Select the row and cow \n#In the range of 1-3 # That Does not affect 9-s in the Grid#\n";
+
+                x1.ShowBoard(); std::cout << "\n\n";
+
                 std::cin >> x1.row >> x1.col;
                 x1.row--; x1.col--;
             } while ((x1.row < 0 || x1.row > 2 || x1.col < 0 || x1.col > 2) || (x1.ValidationCheck(x1.row, x1.col) ));
