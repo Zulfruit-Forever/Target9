@@ -131,7 +131,7 @@ public:
     }
     //is it empty?
     bool empty();
-    //delete
+    //delete 
     void pop();
     //Do you really need comments for that?
     void push(int, int);
@@ -141,8 +141,7 @@ public:
 
 
     void Undo(Board& board) {
-
-        if (currentNode==nullptr ){
+        if (currentNode == nullptr) {
             std::cout << "No moves to undo!\n";
             return;
         }
@@ -150,21 +149,19 @@ public:
         //easter egg with printf
         printf("\nMethod Undo\n");
 
-
+        // Apply undo action
         board.changeGrid(currentNode->entry.row, currentNode->entry.col, 1);
 
+        // Move currentNode to the next in the sequence
         currentNode = currentNode->next;
+
         std::cout << "\n";
-
         board.ShowBoard();
-
-
     }
+
     void Redo(Board& board) {
 
-        Stack* temp = topnode;
-
-        if (topnode == currentNode||topnode==nullptr) {
+        if (topnode == nullptr || currentNode == topnode) {
             std::cout << "No moves to redo!\n";
             return;
         }
@@ -178,18 +175,22 @@ public:
         //      ||   v   ||
         //      ||  next ||
         //         
-    
-        while (temp->next!= currentNode)
-            temp = temp->next;
+        printf("\nMethod Redo\n");
 
-        std::cout << "Redo\n";
+        // Move currentNode back to the previous node
+        if (currentNode == nullptr) {
+            currentNode = topnode;
+        }
+        else {
+            currentNode = currentNode->next;
+        }
 
         //if ((board.ValidationCheck(currentNode->entry.row, currentNode->entry.row)))
-            board.changeGrid(temp->entry.row, temp->entry.col, 0);
+        board.changeGrid(currentNode->entry.row, currentNode->entry.col, 0);
         //else
         //   std::cout << "Cannot procced, 9-s being affected\n";
-         board.ShowBoard();
-         currentNode = temp;
+
+        board.ShowBoard();
     }
 
 
@@ -250,9 +251,9 @@ void Stack::push(int row, int col) {
     }
 
     // Create a new node for the new move
-    Stack* temp = new Stack(row, col, topnode); // The new node's next is the current top node.
+    Stack* temp = new Stack(row, col, topnode); 
     topnode = temp; // Update topnode to point to the new node.
-    currentNode = topnode; // Set currentNode to the new topnode.
+    currentNode = topnode; 
 }
 
 /// Main Function
