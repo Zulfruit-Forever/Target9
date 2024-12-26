@@ -335,8 +335,8 @@ int main() {
 
     std::cout << "\n###Congrats!###\n\n";
 
-    std::cout << "print\n";
-    x2->printStack();
+    
+    //x2->printStack();
 
     x1.ShowBoard();
 
